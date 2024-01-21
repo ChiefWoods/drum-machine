@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
   import { displayText } from "./DrumMachine.svelte";
 
-  const keyToClipname = {
+  const keyToClipname: { [key: string]: string } = {
     Q: "Heater 1",
     W: "Heater 2",
     E: "Heater 3",
@@ -13,7 +13,7 @@
     C: "Closed HH",
   };
 
-  export function playClip(key: string) {
+  function playClip(key: string) {
     const audio = document.getElementById(key) as HTMLAudioElement;
 
     if (audio) {
@@ -21,6 +21,28 @@
       audio.play();
       displayText.set(keyToClipname[key]);
     }
+  }
+
+  function handleKeyDown(e: KeyboardEvent) {
+    const button = document.getElementById(
+      keyToClipname[e.key.toUpperCase()]
+    ) as HTMLButtonElement;
+
+    if (button) {
+      button.classList.add("pressed");
+    }
+  }
+
+  function handleKeyUp(e: KeyboardEvent) {
+    const button = document.getElementById(
+      keyToClipname[e.key.toUpperCase()]
+    ) as HTMLButtonElement;
+
+    if (button) {
+      button.classList.remove("pressed");
+    }
+
+    playClip(e.key.toUpperCase());
   }
 </script>
 
@@ -30,10 +52,16 @@
   export let clipName: string;
 </script>
 
-<div id={clipName} class="drum-pad" on:click={() => playClip(key)}>
+<button
+  id={clipName}
+  class="drum-pad"
+  type="button"
+  on:click={() => playClip(key)}
+>
   {key}
   <audio src={audioSrc} id={key} class="clip"></audio>
-</div>
+</button>
+<svelte:window on:keydown={handleKeyDown} on:keyup={handleKeyUp} />
 
 <style>
   .drum-pad {
@@ -48,10 +76,11 @@
     place-items: center;
     cursor: pointer;
     box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.5);
+    outline: none;
   }
 
   .drum-pad:active,
-  .drum-pad.pressed {
+  :global(.drum-pad.pressed) {
     background: #3c3c3c;
     box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.5);
     color: rgb(187, 187, 187);

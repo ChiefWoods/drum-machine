@@ -11,6 +11,7 @@ Web instrument for Front End Development Libraries in [freeCodeCamp](https://www
 ## Features
 
 - Play pre-recorded audio snippets
+- Includes keyboard support
 
 ## Built With
 
