@@ -1,17 +1,16 @@
-<script lang="ts" context="module">
-  import { displayText } from "./DrumMachine.svelte";
+<script lang="ts">
+  import { getClipname } from "./pads";
+  import { displayText } from "./stores";
 
-  const keyToClipname: { [key: string]: string } = {
-    Q: "Heater 1",
-    W: "Heater 2",
-    E: "Heater 3",
-    A: "Heater 4",
-    S: "Clap",
-    D: "Open HH",
-    Z: "Kick n' Hat",
-    X: "Kick",
-    C: "Closed HH",
-  };
+  let {
+    key,
+    audioSrc,
+    clipName,
+  }: {
+    key: string;
+    audioSrc: string;
+    clipName: string;
+  } = $props();
 
   function playClip(key: string) {
     const audio = document.getElementById(key) as HTMLAudioElement;
@@ -19,49 +18,45 @@
     if (audio) {
       audio.currentTime = 0;
       audio.play();
-      displayText.set(keyToClipname[key]);
+
+      const clipname = getClipname(key);
+
+      if (clipname) {
+        displayText.set(clipname);
+      }
     }
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    const button = document.getElementById(
-      keyToClipname[e.key.toUpperCase()]
-    ) as HTMLButtonElement;
+    const clipname = getClipname(e.key.toUpperCase());
 
-    if (button) {
+    if (clipname) {
+      const button = document.getElementById(clipname) as HTMLButtonElement;
       button.classList.add("pressed");
     }
   }
 
   function handleKeyUp(e: KeyboardEvent) {
-    const button = document.getElementById(
-      keyToClipname[e.key.toUpperCase()]
-    ) as HTMLButtonElement;
+    const clipname = getClipname(e.key.toUpperCase());
 
-    if (button) {
+    if (clipname) {
+      const button = document.getElementById(clipname) as HTMLButtonElement;
       button.classList.remove("pressed");
+      playClip(e.key.toUpperCase());
     }
-
-    playClip(e.key.toUpperCase());
   }
-</script>
-
-<script lang="ts">
-  export let key: string;
-  export let audioSrc: string;
-  export let clipName: string;
 </script>
 
 <button
   id={clipName}
   class="drum-pad"
   type="button"
-  on:click={() => playClip(key)}
+  onclick={() => playClip(key)}
 >
   {key}
   <audio src={audioSrc} id={key} class="clip"></audio>
 </button>
-<svelte:window on:keydown={handleKeyDown} on:keyup={handleKeyUp} />
+<svelte:window onkeydown={handleKeyDown} onkeyup={handleKeyUp} />
 
 <style>
   .drum-pad {
